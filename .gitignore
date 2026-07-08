@@ -67,3 +67,41 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+build/
+.sconsign.dblite
+*.csv
+*.vtk
+*.vti
+*.o
+*.out
+.gdb_history
+.idea/.gitignore
+.idea/.name
+.idea/mamico-dev.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.vscode/
+compile_commands.json
+*.so
+*.pyc
+*.png
+coupling/scenario/kvs-lbmpy/*.xml
+coupling/scenario/kvs-lbmpy/*.ini
+*.old
+*.html
+*.dot
+docs/
+*.checkpoint
+.vscode/launch.json
+*.ova
+*.bp.tar.gz
+*.bp
+*.txt
+/runcouette
+/runkvs
+# Symbolic link to LAMMPS source files
+/lammps
+# mamico-cfg cache
+.mamico-cfg.cache

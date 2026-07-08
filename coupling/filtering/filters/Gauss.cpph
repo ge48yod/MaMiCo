@@ -1,0 +1,188 @@
+// This file is part of the Mamico project. For conditions of distribution
+// and use, please see the copyright notice in Mamico's main folder, or at
+// www5.in.tum.de/mamico
+
+/** Implementation of Gauss.h
+ *  @author Felix Maurer
+ */
+
+// Member functions of Gauss.h:
+template <unsigned int dim, coupling::indexing::IndexTrait... scope>
+// TODO: This is very much hardcoded for kernel radius = 1
+void coupling::filtering::Gauss<dim, scope...>::operator()() {
+#ifdef DEBUG_GAUSS
+  std::cout << "		GAUSS(Dim: " << _dim << "): Applying filter..." << std::endl;
+#endif
+
+  using namespace coupling::indexing;
+
+  ScalarIndex index;
+  ScalarIndex indexAbove;
+  ScalarIndex indexBelow;
+
+  for (unsigned int raw_index = 0; raw_index < _inputCells.size(); raw_index++) {
+
+    // construct CellIndex using raw index
+    index = ScalarIndex{raw_index};
+
+    // make use of implicit conversion between linear <-> vector indices
+    indexAbove = getIndexAbove(index, _dim);
+    indexBelow = getIndexBelow(index, _dim);
+
+    /*
+    std::cout << "INDEX: " << index << std::endl;
+    std::cout << "ABOVE: " << indexAbove << std::endl;
+    std::cout << "BELOW: " << indexBelow << std::endl;
+    */
+
+    //[0] = below, [1] = at index, [2] = above
+    double weights[3] = {_kernel[0], _kernel[1], _kernel[2]};
+
+    // only one of these two cases can occur at once
+    if (indexBelow == index) {
+      // set weight of out of bounds index to zero
+      weights[0] = 0;
+
+      switch (_extrapolationStrategy) {
+      case NONE:
+        break;
+      case MIRROR:
+        weights[2] *= 2;
+        break;
+      case REFLECT:
+        weights[1] *= 2;
+        break;
+      }
+
+      // normalize the other two weights
+      double weightsSum = weights[1] + weights[2];
+      weights[1] /= weightsSum;
+      weights[2] /= weightsSum;
+    }
+
+    // Since the domain has to be larger than one unit in all directions, not
+    // both the index above and below can be illegal at the same time.
+    else if (indexAbove == index) {
+      // set weight of out of bounds index to zero
+      weights[2] = 0;
+
+      switch (_extrapolationStrategy) {
+      case NONE:
+        break;
+      case MIRROR:
+        weights[0] *= 2;
+        break;
+      case REFLECT:
+        weights[1] *= 2;
+        break;
+      }
+
+      // normalize the other two weights
+      double weightsSum = weights[0] + weights[1];
+      weights[0] /= weightsSum;
+      weights[1] /= weightsSum;
+    }
+
+    // apply to scalars
+    for (const auto scalarProperty : _scalarAccessFunctionPairs) {
+      (_outputCells[raw_index]->*scalarProperty.set)((_inputCells[indexBelow.get()]->*scalarProperty.get)() * weights[0] +
+                                                     (_inputCells[raw_index]->*scalarProperty.get)() * weights[1] +
+                                                     (_inputCells[indexAbove.get()]->*scalarProperty.get)() * weights[2]);
+    }
+    // apply to vectors
+    for (const auto vectorProperty : _vectorAccessFunctionPairs) {
+      (_outputCells[raw_index]->*vectorProperty.set)((_inputCells[indexBelow.get()]->*vectorProperty.get)() * weights[0] +
+                                                     (_inputCells[raw_index]->*vectorProperty.get)() * weights[1] +
+                                                     (_inputCells[indexAbove.get()]->*vectorProperty.get)() * weights[2]);
+    }
+  } // index
+
+#ifdef DEBUG_GAUSS
+  std::cout << "done." << std::endl;
+#endif
+}
+
+// Private functions of Gauss.h:
+
+/**
+ * @brief Computes the one-dimensional Gaussian kernel.
+ * Kernel size is 1 + 2 * GAUSS_KERNEL_RADIUS, because there is one central cell a
+ *  and GAUSS_KERNEL_RADIUS neighboring cells before and after that.
+ *
+ * @returns an array with kernel weights, normalized to sum(weights)=1
+ */
+template <unsigned int dim, coupling::indexing::IndexTrait... scope>
+std::array<double, 1 + 2 * GAUSS_KERNEL_RADIUS> coupling::filtering::Gauss<dim, scope...>::generateKernel() {
+  // std::cout << "gauss: kernel radius: " << GAUSS_KERNEL_RADIUS << std::endl;
+
+  std::array<double, 1 + 2 * GAUSS_KERNEL_RADIUS> kernel;
+  unsigned int i = 0; // index in kernel
+  double sum = 0;     // used for normalization
+
+  // fill kernel using Gaussian error function
+  for (int x = -GAUSS_KERNEL_RADIUS; x <= GAUSS_KERNEL_RADIUS; x++) {
+    kernel[i] = gaussianDensityFunction(x);
+
+    sum += kernel[i];
+    i++;
+  }
+
+  // normalize kernel. by definition, sum cannot be 0.
+  for (auto& k : kernel) {
+    k *= 1 / sum;
+
+#ifdef DEBUG_GAUSS
+    std::cout << "		GAUSS(Dim: " << _dim << "): Add kernel entry: " << k << std::endl;
+#endif
+  }
+
+  return kernel;
+}
+
+template <unsigned int dim, coupling::indexing::IndexTrait... scope>
+constexpr double coupling::filtering::Gauss<dim, scope...>::gaussianDensityFunction(int x) {
+  double ans = (1 / (_sigma * sqrt(2 * M_PI))) * exp(-0.5 * (x / _sigma) * (x / _sigma));
+  return ans;
+}
+
+template <unsigned int dim, coupling::indexing::IndexTrait... scope>
+typename coupling::filtering::Gauss<dim, scope...>::VectorIndex
+coupling::filtering::Gauss<dim, scope...>::getIndexAbove(const coupling::filtering::Gauss<dim, scope...>::VectorIndex index, unsigned int d) {
+  // check for border indices
+  const coupling::indexing::BaseIndex<dim> boundary = coupling::filtering::Gauss<dim, scope...>::VectorIndex::upperBoundary;
+  for (unsigned int d = 0; d < dim; d++) {
+    // convert index to BaseIndex and compare with boundary.
+    if ((coupling::indexing::BaseIndex<dim>{index}).get()[d] >= boundary.get()[d])
+      // if index is out of bounds, return it unmodified. this gets detected in
+      // operator()'s boundary handling.
+      return index;
+  }
+
+  // get raw vector index
+  tarch::la::Vector<dim, int> ans = index.get();
+  // get upper index in dimension d
+  ans[d] += 1;
+
+  return VectorIndex{ans};
+}
+
+template <unsigned int dim, coupling::indexing::IndexTrait... scope>
+typename coupling::filtering::Gauss<dim, scope...>::VectorIndex
+coupling::filtering::Gauss<dim, scope...>::getIndexBelow(const coupling::filtering::Gauss<dim, scope...>::VectorIndex index, unsigned int d) {
+  // check for border indices
+  const coupling::indexing::BaseIndex<dim> boundary = coupling::filtering::Gauss<dim, scope...>::VectorIndex::lowerBoundary;
+  for (unsigned int d = 0; d < dim; d++) {
+    // convert index to BaseIndex and compare with boundary.
+    if ((coupling::indexing::BaseIndex<dim>{index}).get()[d] <= boundary.get()[d])
+      // if index is out of bounds, return it unmodified. this gets detected in
+      // operator()'s boundary handling.
+      return index;
+  }
+
+  // copy input index
+  tarch::la::Vector<dim, int> ans = index.get();
+  // get lower index in dimension d
+  ans[d] -= 1;
+
+  return VectorIndex{ans};
+}

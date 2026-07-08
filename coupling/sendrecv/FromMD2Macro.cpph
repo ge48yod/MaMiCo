@@ -1,0 +1,138 @@
+// Copyright (C) 2015 Technische Universitaet Muenchen
+// This file is part of the Mamico project. For conditions of distribution
+// and use, please see the copyright notice in Mamico's main folder, or at
+// www5.in.tum.de/mamico
+
+#pragma region collective operations
+
+template <class Cell_T, unsigned int dim>
+template <class Container_T1, class Container_T2>
+void coupling::sendrecv::FromMD2Macro<Cell_T, dim>::reduceFromMD2Macro(std::vector<coupling::sendrecv::DataExchangeFromMD2Macro<dim>*>& dataExchanges,
+                                                                       const Container_T1& src, const Container_T2& dst) {
+  const unsigned int rank = IDXS.getRank();
+
+  // empty send and receive buffers
+  coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::deleteBuffers();
+
+  for (unsigned int i = 0; i < dataExchanges.size(); ++i) {
+    if (nullptr == dataExchanges[i])
+      continue;
+    // fill the reduce buffers (expands the reduce buffer)
+    writeToReduceBuffer(*dataExchanges[i], src);
+    // allocate the reduce buffers (additional)
+    allocateReduceBufferForReceiving(*dataExchanges[i], dst);
+  }
+
+  // allocate all requests -> needs to be called AFTER all buffers are filled
+  coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::allocateReduceRequests(rank);
+
+  // trigger MPI reduce
+  coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::triggerReduce(rank);
+
+  coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::waitAllCollectiveOperations();
+
+  for (unsigned int i = 0; i < dataExchanges.size(); ++i) {
+    if (nullptr == dataExchanges[i])
+      continue;
+    readFromReduceBuffer(*dataExchanges[i], dst);
+  }
+}
+
+template <class Cell_T, unsigned int dim>
+void coupling::sendrecv::FromMD2Macro<Cell_T, dim>::writeToReduceBuffer(coupling::sendrecv::DataExchangeFromMD2Macro<dim>& dataExchange,
+                                                                        const Local_Container_T& cells) {
+  for (auto idx : I10())
+    coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::writeToReduceBuffer(dataExchange, cells[idx], idx);
+}
+
+template <class Cell_T, unsigned int dim>
+template <class Container_T>
+void coupling::sendrecv::FromMD2Macro<Cell_T, dim>::allocateReduceBufferForReceiving(coupling::sendrecv::DataExchangeFromMD2Macro<dim>& dataExchange,
+                                                                                     const Container_T& cells) {
+  I01* idx;
+  Cell_T* cell;
+  for (auto pair : cells) {
+    std::tie(cell, idx) = pair;
+    coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::allocateReduceBufferForReceiving(dataExchange, idx);
+  }
+}
+
+template <class Cell_T, unsigned int dim>
+template <class Container_T>
+void coupling::sendrecv::FromMD2Macro<Cell_T, dim>::readFromReduceBuffer(coupling::sendrecv::DataExchangeFromMD2Macro<dim>& dataExchange,
+                                                                         const Container_T& cells) {
+  I01* idx;
+  Cell_T* cell;
+  for (auto pair : cells) {
+    std::tie(cell, idx) = pair;
+    coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::readFromReduceBuffer(dataExchange, cell, idx);
+  }
+}
+
+#pragma endregion // collective operations
+
+#pragma region sequential operations
+
+template <class Cell_T, unsigned int dim>
+void coupling::sendrecv::FromMD2Macro<Cell_T, dim>::sendFromMD2Macro(coupling::sendrecv::DataExchange<Cell_T, dim>& dataExchange, const Local_Container_T& src,
+                                                                     const Macro_Container_T& dst) {
+  sendFromMD2MacroNonBlocking(dataExchange, src, dst);
+  wait4SendFromMD2Macro(dataExchange, dst);
+}
+
+template <class Cell_T, unsigned int dim>
+void coupling::sendrecv::FromMD2Macro<Cell_T, dim>::sendFromMD2MacroNonBlocking(coupling::sendrecv::DataExchange<Cell_T, dim>& dataExchange,
+                                                                                const Local_Container_T& src, const Macro_Container_T& dst) {
+  // empty send and receive buffers
+  coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::deleteBuffers();
+
+  // allocate the receive buffers and trigger the MPI-recv
+  allocateReceiveBuffers(dataExchange, dst);
+  // fill the send buffers
+  writeToSendBuffer(dataExchange, src);
+
+  // allocate all requests -> needs to be called AFTER all buffers are filled
+  coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::allocateRequests();
+
+  // trigger MPI recv/send
+  coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::triggerReceiving(dataExchange);
+  coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::triggerSending(dataExchange);
+}
+
+template <class Cell_T, unsigned int dim>
+void coupling::sendrecv::FromMD2Macro<Cell_T, dim>::allocateReceiveBuffers(coupling::sendrecv::DataExchange<Cell_T, dim>& dataExchange,
+                                                                           const Macro_Container_T& cells) {
+  I01 idx;
+  Cell_T* cell;
+  for (auto pair : cells) {
+    std::tie(cell, idx) = pair;
+    coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::allocateReceiveBuffers(dataExchange, idx);
+  }
+}
+
+template <class Cell_T, unsigned int dim>
+void coupling::sendrecv::FromMD2Macro<Cell_T, dim>::writeToSendBuffer(coupling::sendrecv::DataExchange<Cell_T, dim>& dataExchange,
+                                                                      const Local_Container_T& cells) {
+  coupling::datastructures::CellContainer<I10, dim> container;
+  for (auto idx : I10())
+    container << cells[idx];
+  coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::writeToSendBuffer(dataExchange, container);
+}
+
+template <class Cell_T, unsigned int dim>
+void coupling::sendrecv::FromMD2Macro<Cell_T, dim>::wait4SendFromMD2Macro(coupling::sendrecv::DataExchange<Cell_T, dim>& dataExchange,
+                                                                          const Macro_Container_T& cells) {
+  // wait for all send- and receive operations to complete
+  coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::waitAllOperations();
+
+  // fill information from receive buffers into the coupling cells
+  readFromReceiveBuffer(dataExchange, cells);
+}
+
+template <class Cell_T, unsigned int dim>
+void coupling::sendrecv::FromMD2Macro<Cell_T, dim>::readFromReceiveBuffer(coupling::sendrecv::DataExchange<Cell_T, dim>& dataExchange,
+                                                                          const Macro_Container_T& cells) {
+  coupling::sendrecv::SendReceiveBuffer<Cell_T, dim>::readFromReceiveBuffer(dataExchange, cells);
+}
+
+#pragma endregion // sequential operations
