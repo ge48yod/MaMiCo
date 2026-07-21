@@ -29,7 +29,6 @@ public:
     // helper variables
     const tarch::la::Vector<dim, unsigned int> linkedCellsPerCouplingCell(1);
     const tarch::la::Vector<dim, unsigned int> linkedCellInCouplingCell(0);
-    // const coupling::IndexConversion<dim>& indexConversion = TestLammps<dim>::_couplingCellService->getIndexConversion();
     const double tolerance = 1.0e-8; // this value should be the same as tolerance defined in MDSolverInterface of LAMMPS
     int rank, size;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -55,7 +54,9 @@ public:
     const tarch::la::Vector<dim, double> velAddAtom(5.0);
     const tarch::la::Vector<dim, double> fAddAtom(10.0);
     const coupling::datastructures::Molecule<dim> addMolecule(posAddAtom, velAddAtom, fAddAtom, dummyEnergy);
-    tarch::la::Vector<dim, unsigned int> addCellIndex(2); // global cell index for adding atom
+    //MY BAD CHANGE
+    // tarch::la::Vector<dim, unsigned int> addCellIndex(2); // global cell index for adding atom
+    I01 addCellIndex(2); // global cell index for adding atom
     // true, if this rank holds the respective domain containing the new molecule's position
     const bool performAdd =
         (size == 1) || ((size == 4) && (rank == 0)) || ((size == 16) && (rank == 5)) || ((size == 8) && (rank == 0)) || ((size == 64) && (rank == 21));
@@ -77,15 +78,20 @@ public:
     // delete atom
     if (performDeletion) {
       const int numberAtoms = TestLammps<dim>::_lammps->atom->nlocal;
-      // convert global to local coordinate
-      I01 globalIndex{tarch::la::Vector<3, int>{deleteCellIndex}};
-      I11 localIndex{globalIndex};
-      // I03 localVectorIndex{globalVectorIndex.get()};
+      //MY BAD CHANGE
+      // // convert global to local coordinate
+      // I01 globalIndex{tarch::la::Vector<3, int>{deleteCellIndex}};
+      // I11 localIndex{globalIndex};
+      // // I03 localVectorIndex{globalVectorIndex.get()};
+      // LAMMPS_NS::MamicoCell& deleteCell =
+      //     coupling::interface::MamicoInterfaceProvider<LAMMPS_NS::MamicoCell, dim>::getInstance().getMDSolverInterface()->getLinkedCell(
+      //       localIndex,
+      //       linkedCellInCouplingCell,
+      //       linkedCellsPerCouplingCell);
+
       LAMMPS_NS::MamicoCell& deleteCell =
           coupling::interface::MamicoInterfaceProvider<LAMMPS_NS::MamicoCell, dim>::getInstance().getMDSolverInterface()->getLinkedCell(
-            localIndex,
-            linkedCellInCouplingCell,
-            linkedCellsPerCouplingCell);
+              I03{deleteCellIndex}, linkedCellInCouplingCell, linkedCellsPerCouplingCell);
       coupling::interface::MoleculeIterator<LAMMPS_NS::MamicoCell, dim>* iterator =
           coupling::interface::MamicoInterfaceProvider<LAMMPS_NS::MamicoCell, dim>::getInstance().getMDSolverInterface()->getMoleculeIterator(deleteCell);
       int cellCounterBeforeDeletion = 0;
@@ -144,14 +150,19 @@ public:
     // TEST ADDING A MOLECULE ---------------------------------------------------------
     if (performAdd) {
       const int numberAtoms = TestLammps<dim>::_lammps->atom->nlocal;
-      // convert global to local cell index
-      I01 globalIndex{tarch::la::Vector<3, int>{addCellIndex}};
-      I11 localIndex{globalIndex};
+      //MY BAD CHANGE
+      // // convert global to local cell index
+      // I01 globalIndex{tarch::la::Vector<3, int>{addCellIndex}};
+      // I11 localIndex{globalIndex};
+      // LAMMPS_NS::MamicoCell& addCell =
+      //     coupling::interface::MamicoInterfaceProvider<LAMMPS_NS::MamicoCell, dim>::getInstance().getMDSolverInterface()->getLinkedCell(
+      //       localIndex,
+      //       linkedCellInCouplingCell,
+      //       linkedCellsPerCouplingCell);
+// 
       LAMMPS_NS::MamicoCell& addCell =
           coupling::interface::MamicoInterfaceProvider<LAMMPS_NS::MamicoCell, dim>::getInstance().getMDSolverInterface()->getLinkedCell(
-            localIndex,
-            linkedCellInCouplingCell,
-            linkedCellsPerCouplingCell);
+              I03{addCellIndex}, linkedCellInCouplingCell, linkedCellsPerCouplingCell);
       coupling::interface::MoleculeIterator<LAMMPS_NS::MamicoCell, dim>* iterator =
           coupling::interface::MamicoInterfaceProvider<LAMMPS_NS::MamicoCell, dim>::getInstance().getMDSolverInterface()->getMoleculeIterator(addCell);
       int cellCounterBeforeAdding = 0;

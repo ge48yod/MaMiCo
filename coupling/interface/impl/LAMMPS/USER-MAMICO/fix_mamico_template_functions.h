@@ -4,7 +4,6 @@
 // www5.in.tum.de/mamico
 
 template <unsigned int dim> void LAMMPS_NS::FixMamico::modifyMDSystem() {
-  auto& idxs = IDXS;
   coupling::services::CouplingCellService<dim>* couplingCellService =
       coupling::interface::MamicoInterfaceProvider<MamicoCell, dim>::getInstance().getCouplingCellService();
   LAMMPS_NS::MamicoLammpsMDSolverInterface<dim>* mdSolverInterface =
@@ -16,47 +15,46 @@ template <unsigned int dim> void LAMMPS_NS::FixMamico::modifyMDSystem() {
     std::cout << "ERROR modifyMDSystem(): Could not cast MDSolverInterface!" << std::endl;
     exit(EXIT_FAILURE);
   }
-  std::cout << "FixMamico, Rank " << idxs.getRank() << ": Sort particles into cells" << std::endl;
+  std::cout << "FixMamico, Rank " << IDXS.getRank() << ": Sort particles into cells" << std::endl;
 #endif
   mdSolverInterface->updateAllCells();
 
 // call to coupling cell service functions ----------------------------------
 #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
-  std::cout << "FixMamico, Rank " << idxs.getRank() << ": Process inner cells after MD timestep" << std::endl;
+  std::cout << "FixMamico, Rank " << IDXS.getRank() << ": Process inner cells after MD timestep" << std::endl;
 #endif
   couplingCellService->processInnerCouplingCellAfterMDTimestep();
 #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
-  std::cout << "FixMamico, Rank " << idxs.getRank() << ": Distribute mass" << std::endl;
+  std::cout << "FixMamico, Rank " << IDXS.getRank() << ": Distribute mass" << std::endl;
 #endif
   couplingCellService->distributeMass(_timestepCounter);
 #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
-  std::cout << "FixMamico,Rank " << idxs.getRank() << ": Plot every microscopic time step..." << std::endl;
+  std::cout << "FixMamico,Rank " << IDXS.getRank() << ": Plot every microscopic time step..." << std::endl;
 #endif
   couplingCellService->plotEveryMicroscopicTimestep(_timestepCounter);
 #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
-  std::cout << "FixMamico,Rank " << idxs.getRank() << ": Go to next time step..." << std::endl;
+  std::cout << "FixMamico,Rank " << IDXS.getRank() << ": Go to next time step..." << std::endl;
 #endif
 }
 
 template <unsigned int dim> void LAMMPS_NS::FixMamico::modifyMomentumAndTemperature() {
-  auto& idxs = IDXS;
   coupling::services::CouplingCellService<dim>* couplingCellService =
       coupling::interface::MamicoInterfaceProvider<MamicoCell, dim>::getInstance().getCouplingCellService();
   LAMMPS_NS::MamicoLammpsMDSolverInterface<dim>* mdSolverInterface =
       (LAMMPS_NS::MamicoLammpsMDSolverInterface<dim>*)coupling::interface::MamicoInterfaceProvider<MamicoCell, dim>::getInstance().getMDSolverInterface();
 
 #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
-  std::cout << "FixMamico, Rank " << idxs.getRank() << ": Apply thermostat" << std::endl;
+  std::cout << "FixMamico, Rank " << IDXS.getRank() << ": Apply thermostat" << std::endl;
 #endif
   couplingCellService->applyTemperatureToMolecules(_timestepCounter);
   // update cells once again (sorting of molecules)
   mdSolverInterface->updateAllCells();
 #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
-  std::cout << "FixMamico, Rank " << idxs.getRank() << ": Modify momentum" << std::endl;
+  std::cout << "FixMamico, Rank " << IDXS.getRank() << ": Modify momentum" << std::endl;
 #endif
   couplingCellService->distributeMomentum(_timestepCounter);
 #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
-  std::cout << "FixMamico, Rank " << idxs.getRank() << ": Apply boundary force" << std::endl;
+  std::cout << "FixMamico, Rank " << IDXS.getRank() << ": Apply boundary force" << std::endl;
 #endif
   couplingCellService->applyBoundaryForce(_timestepCounter);
 

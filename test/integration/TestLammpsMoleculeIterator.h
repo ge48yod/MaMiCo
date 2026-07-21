@@ -62,8 +62,9 @@ public:
       std::cout << "ERROR: Could not cast pointer to CouplingCellServiceImpl!" << std::endl;
       exit(EXIT_FAILURE);
     }
-    // const coupling::IndexConversion<dim>& indexConversion = couplingCellService->getIndexConversion();
+    //MY NEW CHANGE
     coupling::datastructures::LinkedCellContainer<LAMMPS_NS::MamicoCell, dim>& couplingCells = couplingCellService->getCouplingCells();
+    // coupling::datastructures::CellContainer<LAMMPS_NS::MamicoCell, dim>& couplingCells = couplingCellService->getCouplingCells();
     const std::vector<tarch::la::Vector<2, unsigned int>> numberMoleculesPerCouplingCell = initNumberMoleculesPerCouplingCell();
 
     // instantiate a molecule extractor
@@ -174,7 +175,9 @@ private:
 
   /** loops over all coupling cells on this process and checks for the number of molecules in each cell. Further, we plot the molecule positions of each
    * cell. */
+  //MY NEW CHANGE
   void testMolecules(coupling::datastructures::LinkedCellContainer<LAMMPS_NS::MamicoCell, dim>& couplingCells,
+  // void testMolecules(coupling::datastructures::CellContainer<LAMMPS_NS::MamicoCell, dim>& couplingCells,
                      coupling::cellmappings::MoleculeExtractor<LAMMPS_NS::MamicoCell, dim>& moleculeExtractor,
                      const std::vector<tarch::la::Vector<2, unsigned int>>& numberMoleculesPerCouplingCell) {
     const tarch::la::Vector<dim, unsigned int> localCells = I11::numberCellsInDomain;
@@ -202,28 +205,47 @@ private:
         }
       }
     } else {
-      for (loop[2] = 1; loop[2] < localCells[2] + 1; loop[2]++) {
-        for (loop[1] = 1; loop[1] < localCells[1] + 1; loop[1]++) {
-          for (loop[0] = 1; loop[0] < localCells[0] + 1; loop[0]++) {
-            // determine linearised indices
-            const unsigned int localIndex = coupling::indexing::convertToScalar(I03{tarch::la::Vector<dim, int>(loop)});
-            const unsigned int globalIndex = I00{I02{localIndex}}.get();
-            // determine number of molecules in this cell, based on cell structure
-            (couplingCells.getLinkedCellContainer())[localIndex].iterateConstCells(moleculeExtractor);
-            const unsigned int numberMoleculesFound = (unsigned int)moleculeExtractor.getExtractedMolecules().size();
-            // determine the number of molecules as it was expected
-            const unsigned int numberMoleculesExpected = findNumberMolecules(globalIndex, numberMoleculesPerCouplingCell);
-            if (numberMoleculesFound != numberMoleculesExpected) {
-              std::cout << "ERROR TestLammpsMoleculeIterator: Found molecules=" << numberMoleculesFound << ", expected=" << numberMoleculesExpected
-                        << std::endl;
-              std::cout << "This process: " << coupling::indexing::IndexingService<dim>::getInstance().getThisProcess() << "; considered (global cell): " << globalIndex << std::endl;
-              exit(EXIT_FAILURE);
-            }
-            std::cout << "Global cell index=" << globalIndex << ", molecule coordinates:" << std::endl;
-            for (unsigned int i = 0; i < numberMoleculesFound; i++) {
-              std::cout << (moleculeExtractor.getExtractedMolecules())[i] << std::endl;
-            }
-          }
+      //MY BAD CHANGE
+      
+      // for (loop[2] = 1; loop[2] < localCells[2] + 1; loop[2]++) {
+      //   for (loop[1] = 1; loop[1] < localCells[1] + 1; loop[1]++) {
+      //     for (loop[0] = 1; loop[0] < localCells[0] + 1; loop[0]++) {
+      //       // determine linearised indices
+      //       const unsigned int localIndex = coupling::indexing::convertToScalar(I03{tarch::la::Vector<dim, int>(loop)});
+      //       const unsigned int globalIndex = I00{I02{localIndex}}.get();
+      //       // determine number of molecules in this cell, based on cell structure
+      //       (couplingCells.getLinkedCellContainer())[localIndex].iterateConstCells(moleculeExtractor);
+      //       const unsigned int numberMoleculesFound = (unsigned int)moleculeExtractor.getExtractedMolecules().size();
+      //       // determine the number of molecules as it was expected
+      //       const unsigned int numberMoleculesExpected = findNumberMolecules(globalIndex, numberMoleculesPerCouplingCell);
+      //       if (numberMoleculesFound != numberMoleculesExpected) {
+      //         std::cout << "ERROR TestLammpsMoleculeIterator: Found molecules=" << numberMoleculesFound << ", expected=" << numberMoleculesExpected
+      //                   << std::endl;
+      //         std::cout << "This process: " << coupling::indexing::IndexingService<dim>::getInstance().getThisProcess() << "; considered (global cell): " << globalIndex << std::endl;
+      //         exit(EXIT_FAILURE);
+      //       }
+      //       std::cout << "Global cell index=" << globalIndex << ", molecule coordinates:" << std::endl;
+      //       for (unsigned int i = 0; i < numberMoleculesFound; i++) {
+      //         std::cout << (moleculeExtractor.getExtractedMolecules())[i] << std::endl;
+      //       }
+      //     }
+      for (auto idx : I10()) {
+        // determine linearised indices
+        const unsigned int localIndex = idx.get();
+        const unsigned int globalIndex = I08{idx}.get();
+        // determine number of molecules in this cell, based on cell structure
+        (couplingCells.getLinkedCellContainer())[localIndex].iterateConstCells(moleculeExtractor);
+        const unsigned int numberMoleculesFound = (unsigned int)moleculeExtractor.getExtractedMolecules().size();
+        // determine the number of molecules as it was expected
+        const unsigned int numberMoleculesExpected = findNumberMolecules(globalIndex, numberMoleculesPerCouplingCell);
+        if (numberMoleculesFound != numberMoleculesExpected) {
+          std::cout << "ERROR TestLammpsMoleculeIterator: Found molecules=" << numberMoleculesFound << ", expected=" << numberMoleculesExpected << std::endl;
+          std::cout << "This process: " << indexConversion.getThisProcess() << "; considered (global cell): " << globalIndex << std::endl;
+          exit(EXIT_FAILURE);
+        }
+        std::cout << "Global cell index=" << globalIndex << ", molecule coordinates:" << std::endl;
+        for (unsigned int i = 0; i < numberMoleculesFound; i++) {
+          std::cout << (moleculeExtractor.getExtractedMolecules())[i] << std::endl;
         }
       }
     }

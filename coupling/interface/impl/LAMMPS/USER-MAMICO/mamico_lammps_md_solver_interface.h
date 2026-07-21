@@ -54,6 +54,8 @@ namespace LAMMPS_NS {
 template <unsigned int dim> class MamicoLammpsMDSolverInterface : public coupling::interface::MDSolverInterface<LAMMPS_NS::MamicoCell, dim> {
 public:
 
+  // using CellIndex_T = I11; // FIXME: This should not be required, right?
+  // MY NEW CHANGE , MAYBE NOT NEEDD
   using Base = coupling::interface::MDSolverInterface<LAMMPS_NS::MamicoCell, dim>;
   using CellIndex_T = typename Base::CellIndex_T;
 
@@ -222,8 +224,6 @@ public:
 
   /** adds the molecule to the MD simulation. */
   virtual void addMoleculeToMDSimulation(const coupling::interface::Molecule<dim>& molecule) {
-    // auto& idxs = IDXS; //unused
-
     const int nlocal_previous = _lmp->atom->nlocal;              // no. of atoms before insertion
     tarch::la::Vector<dim, double> pos = molecule.getPosition(); // position of molecule
     double posVec[3] = {0.0, 0.0, 0.0};
@@ -264,7 +264,7 @@ public:
     // method...
     if (indexAtom == -1) {
 #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
-  std::cout << "Molecule not found on rank " << idxs.getRank() << std::endl;
+  std::cout << "Molecule not found on rank " << IDXS.getRank() << std::endl;
 #endif
       return;
     }
@@ -309,17 +309,25 @@ public:
     // typically, one should not really access other coupling modules from an
     // interface; however, since this method is expected to be only called AFTER
     // all initialisation processes are finished, this is safe
-    I01 globalIndex{IDXS.getCellIndex(position)};
-    I03 localIndex{globalIndex};
-    tarch::la::Vector<dim, unsigned int> vectorIndex(0);
-    for (unsigned int d = 0; d < dim; d++) {
-      vectorIndex[d] = (unsigned int)localIndex.get()[d];
-    }
+    I01 idx = IDXS.getCellIndex(position);
 #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
-    std::cout << "Linked cell index for position " << position << ": " << globalIndex.get() << "( global index), corresponds to local vector index of ";
-    std::cout << localIndex.get() << std::endl;
+    std::cout << "Linked cell index for position " << position << ": " << idx << "( global index), corresponds to local vector index of ";
+    std::cout << I03{idx} << std::endl;
 #endif
-    return vectorIndex;
+    tarch::la::Vector<dim, unsigned int> toRet(I03{idx}.get());
+    return toRet;
+    // MY BAD CHANGE
+//     I01 globalIndex{IDXS.getCellIndex(position)};
+//     I03 localIndex{globalIndex};
+//     tarch::la::Vector<dim, unsigned int> vectorIndex(0);
+//     for (unsigned int d = 0; d < dim; d++) {
+//       vectorIndex[d] = (unsigned int)localIndex.get()[d];
+//     }
+// #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
+//     std::cout << "Linked cell index for position " << position << ": " << globalIndex.get() << "( global index), corresponds to local vector index of ";
+//     std::cout << localIndex.get() << std::endl;
+// #endif
+//     return vectorIndex;
   }
 
   /** assumes that a molecule is placed somewhere inside the linked cell at
@@ -366,7 +374,11 @@ public:
     for (loop[2] = start[2]; loop[2] < end[2]; loop[2]++) {
       for (loop[1] = start[1]; loop[1] < end[1]; loop[1]++) {
         for (loop[0] = start[0]; loop[0] < end[0]; loop[0]++) {
-          LAMMPS_NS::MamicoCell& cell = _sorting.getMamicoCell(coupling::indexing::convertToScalar(I03{tarch::la::Vector<dim, int>{coupling::initDimVector<dim>(loop)}}));
+          const tarch::la::Vector<dim, int> couplingCellIndex(coupling::initDimVector<dim>(loop)); // cast to int from unsigned
+          LAMMPS_NS::MamicoCell& cell = _sorting.getMamicoCell(I02{I03{couplingCellIndex}}.get());
+          // MY BAD CHANGE
+          // LAMMPS_NS::MamicoCell& cell = _sorting.getMamicoCell(coupling::indexing::convertToScalar(I03{tarch::la::Vector<dim, int>{coupling::initDimVector<dim>(loop)}}));
+
           coupling::interface::MoleculeIterator<MamicoCell, dim>* it = getMoleculeIterator(cell);
           for (it->begin(); it->continueIteration(); it->next()) {
 #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
@@ -521,9 +533,7 @@ public:
 
   /** prints molecules in all cells/inner cells/only ghost cells. For debugging
    * purposes only. */
-  void printMolecules(typename LAMMPS_NS::Sorting<dim>::PrintType printType) {
-    _sorting.printMolecules(printType);
-  }
+  void printMolecules(typename LAMMPS_NS::Sorting<dim>::PrintType printType) { _sorting.printMolecules(printType); }
 
 private:
   LAMMPS* _lmp;

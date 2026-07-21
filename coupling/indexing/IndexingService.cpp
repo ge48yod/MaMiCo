@@ -337,7 +337,9 @@ void coupling::indexing::IndexingService<dim>::initWithCells(const tarch::la::Ve
     std::cout << "IndexingService: WARNING: Initializing twice! " << std::endl;
   }
 #endif
+
   for (unsigned int d = 0; d < dim; d++) {
+    // MY NEW CHANGE
     _averageLocalNumberCouplingCells[d] =
         globalNumberCouplingCells[d] / numberProcesses[d];
 
@@ -528,7 +530,7 @@ void coupling::indexing::IndexingService<dim>::initWithCells(const tarch::la::Ve
 }
 
 /*
- * This was in large parts stolen from IndexConversion.
+ * This was in large parts stolen from IndexConversion (git tag: legacyIndexing).
  */
 template <unsigned int dim>
 std::vector<unsigned int> coupling::indexing::IndexingService<dim>::getRanksForGlobalIndex(const BaseIndex<dim>& globalCellIndex,
@@ -542,7 +544,7 @@ std::vector<unsigned int> coupling::indexing::IndexingService<dim>::getRanksForG
 
   std::vector<unsigned int> ranks;
   // using the old meaning of 'globalNumberCouplingCells' from
-  // IndexConversion
+  // IndexConversion (git tag: legacyIndexing)
   const auto globalNumberCouplingCells = I08::numberCellsInDomain;
 
   // start and end coordinates of neighbouring cells.
@@ -598,7 +600,7 @@ std::vector<unsigned int> coupling::indexing::IndexingService<dim>::getRanksForG
 }
 
 /*
- * This was in large parts stolen from IndexConversion.
+ * This was in large parts stolen from IndexConversion (git tag: legacyIndexing).
  * Note that this uses the globalNumberCouplingCells definition excl. the
  * ghost layer.
  */
@@ -647,25 +649,6 @@ unsigned int coupling::indexing::IndexingService<dim>::getUniqueRankForCouplingC
 #endif
 
   return getUniqueRankForCouplingCell((tarch::la::Vector<dim, unsigned int>)(globalCellIndex.get()), I09::numberCellsInDomain, topologyOffset);
-}
-
-template <unsigned int dim>
-tarch::la::Vector<dim, unsigned int>
-coupling::indexing::IndexingService<dim>::getProcessCoordinates(unsigned int rank) const {
-    const unsigned int topologyOffset =
-        (rank / _scalarNumberProcesses) * _scalarNumberProcesses;
-    return _parallelTopology->getProcessCoordinates(rank, topologyOffset);
-}
-template <unsigned int dim>
-tarch::la::Vector<dim, unsigned int>
-coupling::indexing::IndexingService<dim>::getThisProcess() const {
-    return getProcessCoordinates(_rank);
-}
-
-template <unsigned int dim>
-tarch::la::Vector<dim, unsigned int>
-coupling::indexing::IndexingService<dim>::getAverageLocalNumberCouplingCells() const {
-    return _averageLocalNumberCouplingCells;
 }
 
 // declare specialisation of IndexingService

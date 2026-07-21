@@ -127,9 +127,11 @@ public:
     for (loop[2] = start[2]; loop[2] < end[2]; loop[2]++) {
       for (loop[1] = start[1]; loop[1] < end[1]; loop[1]++) {
         for (loop[0] = start[0]; loop[0] < end[0]; loop[0]++) {
-          const I11 couplingCellIndex{
-              I01{tarch::la::Vector<3, int>{coupling::initDimVector<dim>(loop)}}
-          };
+          const tarch::la::Vector<dim, int> couplingCellIndex(coupling::initDimVector<dim>(loop));
+          //MY BAD CHANGE
+          // const I11 couplingCellIndex{
+          //     I01{tarch::la::Vector<3, int>{coupling::initDimVector<dim>(loop)}}
+          // };
           // we take a copy instead of a reference since we do not want to have
           // conflicts in the access of the underlying molecule iterators;
           // Example VTK-plotting: the Mamico-plotter iterates over cells and
@@ -137,7 +139,7 @@ public:
           //                       -> using another reference dereferences the
           //                       molecule that
           //                          the "outer" VTK cell iterator points to
-          LAMMPS_NS::MamicoCell cell = mdSolverInterface->getLinkedCell(couplingCellIndex, linkedCellInCouplingCell, linkedCellsPerCouplingCell);
+          LAMMPS_NS::MamicoCell cell = mdSolverInterface->getLinkedCell(I03{couplingCellIndex}, linkedCellInCouplingCell, linkedCellsPerCouplingCell);
           coupling::interface::MoleculeIterator<MamicoCell, dim>* it = mdSolverInterface->getMoleculeIterator(cell);
           for (it->begin(); it->continueIteration(); it->next()) {
             const tarch::la::Vector<dim, double> rij = it->getConst().getPosition() - position1;

@@ -37,6 +37,7 @@ typedef Molecule MardynMolecule;
 class MarDynMDSolverInterface : public coupling::interface::MDSolverInterface<MarDynCell, 3> {
 
 public:
+  // MY NEW CHANGE , MAYBE NOT NEEDED
   using Base = coupling::interface::MDSolverInterface<MarDynCell, 3>;
   using CellIndex_T = typename Base::CellIndex_T;
 
@@ -73,13 +74,18 @@ public:
    * coupling cell. These coordinates thus lie in a range
    * (0,linkedCellsPerCouplingCell-1).
    */
-  virtual MarDynCell& getLinkedCell(const CellIndex_T& couplingCellIndex,
+  virtual MarDynCell& getLinkedCell(const tarch::la::Vector<3, unsigned int>& couplingCellIndex,
                                     const tarch::la::Vector<3, unsigned int>& linkedCellInCouplingCell,
                                     const tarch::la::Vector<3, unsigned int>& linkedCellsPerCouplingCell) {
-    const tarch::la::Vector<3, int> couplingCellIndexRaw = couplingCellIndex.get();
+    //MY BAD CHANGE
+    // const tarch::la::Vector<3, int> couplingCellIndexRaw = couplingCellIndex.get();
+
     // no linked cells found in outer region
     for (unsigned int d = 0; d < 3; d++) {
-      if (couplingCellIndexRaw[d] == 0) {
+      //MY BAD CHANGE
+      // if (couplingCellIndexRaw[d] == 0) {
+
+      if (couplingCellIndex[d] == 0) {
         std::cout << "ERROR in MarDynMDSolverInterface::getLinkedCell(): "
                      "coupling cell index out of range for linked cells!"
                   << std::endl;
@@ -102,7 +108,10 @@ public:
 
       // compute requested cell index vector
       for (int d = 0; d < 3; d++) {
-        requestedCellIndex[d] = (int)floor(couplingCellIndexRaw[d] * macroCellSize[d] / mdCellsize[d]);
+        // MY BAD CHANGE
+        // requestedCellIndex[d] = (int)floor(couplingCellIndexRaw[d] * macroCellSize[d] / mdCellsize[d]);
+
+        requestedCellIndex[d] = (int)floor(couplingCellIndex[d] * macroCellSize[d] / mdCellsize[d]);
         // adjust requested cell index if multiple linked cells per coupling
         // cell are used
         if (linkedCellsPerCouplingCell[d] > 1)

@@ -76,8 +76,11 @@ for i in range(localMDInstances):
     multiMDCellService.getCouplingCellService(
         i).computeAndStoreTemperature(1.1)
 
-buf = mamico.coupling.Buffer(macroscopicSolverInterface,
-                             rank,
-                             mamicoConfig.getMomentumInsertionConfiguration().getInnerOverlap())
+buf = mamico.coupling.Buffer(macroscopicSolverInterface, rank)
+
+#MY BAD CHANGE
+# buf = mamico.coupling.Buffer(macroscopicSolverInterface,
+#                              rank,
+#                              mamicoConfig.getMomentumInsertionConfiguration().getInnerOverlap())
 
 mamico.tarch.utils.finalizeMPI()

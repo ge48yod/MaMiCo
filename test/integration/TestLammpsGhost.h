@@ -36,9 +36,6 @@ public:
       std::cout << "ERROR TestLammpsGhost: could not cast MD Solver interface!" << std::endl;
       exit(EXIT_FAILURE);
     }
-    // const coupling::IndexConversion<dim>& indexConversion =
-    //     coupling::interface::MamicoInterfaceProvider<LAMMPS_NS::MamicoCell, dim>::getInstance().getCouplingCellService()->getIndexConversion();
-
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     int size;

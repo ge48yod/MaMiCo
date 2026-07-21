@@ -90,6 +90,7 @@ public:
       std::cout << "ERROR sortMoleculesIntoCells(): couplingCellService==NULL!" << std::endl;
       exit(EXIT_FAILURE);
     }
+    // MY NEW CHANGE
     // updateAllCells now uses IndexingService internally
     interface->updateAllCells();
   }
@@ -198,6 +199,7 @@ private:
     }
     // --------------------------------------------------------------------------------------------------------------------------------------------
 
+    // MY NEW CHANGE
     // define molecule and LJ parameters
     ss.str("");
     ss << "pair_style lj/cut " << _configuration.getDomainConfiguration().getCutoffRadius();
@@ -220,6 +222,7 @@ private:
     // write output; though this is not vtk format, we use this config for that purpose
     if (_configuration.getVTKConfiguration().getWriteEveryTimestep() != 0) {
       ss.str("");
+      // MY NEW CHANGE
       ss << "dump myDump all custom " << _configuration.getVTKConfiguration().getWriteEveryTimestep() << " ";
       ss << _configuration.getVTKConfiguration().getFilename() << "_" << localMDSimulation << "_"
          << "*.dat id type x y z vx vy vz";

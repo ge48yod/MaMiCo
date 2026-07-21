@@ -88,7 +88,6 @@ public:
       std::cout << "ERROR sortMoleculesIntoCells(): couplingCellService==NULL!" << std::endl;
       exit(EXIT_FAILURE);
     }
-    // updateAllCells now uses IndexingService internally
     interface->updateAllCells();
   }
 

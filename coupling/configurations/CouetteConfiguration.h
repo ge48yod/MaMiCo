@@ -42,7 +42,8 @@ public:
   enum MicroSolverType {
     SIMPLEMD = 0,  ///< the SimpleMD solver is used
     SYNTHETIC = 1, ///< the synthetic solver is used
-    LS1 = 2        ///< the LS1 solver is used
+    LS1 = 2,       ///< the LS1 solver is used
+    LAMMPSMD = 3   ///< the LAMMPS MD solver is used
   };
 
   /** @brief creates CouetteConfig if all elements exist and can be read
@@ -156,7 +157,13 @@ public:
       tarch::configuration::ParseConfiguration::readIntOptional(cfg.totalNumberMDSimulations, subtag, "number-md-simulations");
     } else if (type == "ls1") {
       cfg.miSolverType = LS1;
-
+      cfg.totalNumberMDSimulations = 1;
+      tarch::configuration::ParseConfiguration::readStringOptional(cfg.ls1config, subtag, "ls1config");
+      tarch::configuration::ParseConfiguration::readDoubleMandatory(cfg.temp, subtag, "temperature");
+      tarch::configuration::ParseConfiguration::readIntMandatory(cfg.equSteps, subtag, "equilibration-steps");
+      tarch::configuration::ParseConfiguration::readIntOptional(cfg.totalNumberMDSimulations, subtag, "number-md-simulations");
+    } else if (type == "lammps-md") {
+      cfg.miSolverType = LAMMPSMD;
       cfg.totalNumberMDSimulations = 1;
       tarch::configuration::ParseConfiguration::readDoubleMandatory(cfg.temp, subtag, "temperature");
       tarch::configuration::ParseConfiguration::readIntMandatory(cfg.equSteps, subtag, "equilibration-steps");
@@ -341,6 +348,8 @@ public:
   int twsLoopMax;
   /** @todo piet */
   int twsLoopStep;
+  /* @brief ls1 configuration filename (only relevant when using ls1 as MD solver)*/
+  std::string ls1config = "ls1config.xml";
 
 #if (BUILD_WITH_OPENFOAM)
   /** @brief the configurations for the OpenFoam solver */

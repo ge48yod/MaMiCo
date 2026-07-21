@@ -147,7 +147,7 @@ public:
 
   /**
    * Determines all ranks that contain a certain global BaseIndex.
-   * Ripped from deprecated IndexConversion.
+   * Ripped from deprecated IndexConversion (git tag: legacyIndexing).
    *
    * @param globalCellIndex index to be looked up
    * @param globalNumberCouplingCells global number of cells in BaseIndex
@@ -158,6 +158,7 @@ public:
 
   unsigned int getUniqueRankForCouplingCell(const BaseIndex<dim>& globalCellIndex, unsigned int topologyOffset) const;
 
+  // MY NEW CHANGE
   tarch::la::Vector<dim, unsigned int> getThisProcess() const;
 
   tarch::la::Vector<dim, unsigned int> getAverageLocalNumberCouplingCells() const;
@@ -270,8 +271,6 @@ private:
   unsigned int getUniqueRankForCouplingCell(tarch::la::Vector<dim, unsigned int> globalCellIndex,
                                             const tarch::la::Vector<dim, unsigned int>& globalNumberCouplingCells, unsigned int topologyOffset) const;
 
-  tarch::la::Vector<dim, unsigned int> getProcessCoordinates(unsigned int rank) const;
-  tarch::la::Vector<dim, unsigned int> _averageLocalNumberCouplingCells;
   /*const*/ tarch::la::Vector<dim, unsigned int> _numberProcesses; // TODO: make const
   unsigned int _scalarNumberProcesses;
   const coupling::paralleltopology::ParallelTopology<dim>* _parallelTopology;
