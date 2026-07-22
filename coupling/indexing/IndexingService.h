@@ -271,6 +271,10 @@ private:
   unsigned int getUniqueRankForCouplingCell(tarch::la::Vector<dim, unsigned int> globalCellIndex,
                                             const tarch::la::Vector<dim, unsigned int>& globalNumberCouplingCells, unsigned int topologyOffset) const;
 
+  //MY NEW CHANGE
+  tarch::la::Vector<dim, unsigned int> getProcessCoordinates(unsigned int rank) const;
+  tarch::la::Vector<dim, unsigned int> _averageLocalNumberCouplingCells;
+  
   /*const*/ tarch::la::Vector<dim, unsigned int> _numberProcesses; // TODO: make const
   unsigned int _scalarNumberProcesses;
   const coupling::paralleltopology::ParallelTopology<dim>* _parallelTopology;

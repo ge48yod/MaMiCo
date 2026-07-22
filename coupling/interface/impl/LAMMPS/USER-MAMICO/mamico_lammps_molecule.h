@@ -132,6 +132,8 @@ public:
           // const I11 couplingCellIndex{
           //     I01{tarch::la::Vector<3, int>{coupling::initDimVector<dim>(loop)}}
           // };
+          // 
+          
           // we take a copy instead of a reference since we do not want to have
           // conflicts in the access of the underlying molecule iterators;
           // Example VTK-plotting: the Mamico-plotter iterates over cells and

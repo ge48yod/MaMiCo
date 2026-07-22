@@ -651,6 +651,27 @@ unsigned int coupling::indexing::IndexingService<dim>::getUniqueRankForCouplingC
   return getUniqueRankForCouplingCell((tarch::la::Vector<dim, unsigned int>)(globalCellIndex.get()), I09::numberCellsInDomain, topologyOffset);
 }
 
+// MY NEW CHANGE
+
+template <unsigned int dim>
+tarch::la::Vector<dim, unsigned int>
+coupling::indexing::IndexingService<dim>::getProcessCoordinates(unsigned int rank) const {
+    const unsigned int topologyOffset =
+        (rank / _scalarNumberProcesses) * _scalarNumberProcesses;
+    return _parallelTopology->getProcessCoordinates(rank, topologyOffset);
+}
+template <unsigned int dim>
+tarch::la::Vector<dim, unsigned int>
+coupling::indexing::IndexingService<dim>::getThisProcess() const {
+    return getProcessCoordinates(_rank);
+}
+
+template <unsigned int dim>
+tarch::la::Vector<dim, unsigned int>
+coupling::indexing::IndexingService<dim>::getAverageLocalNumberCouplingCells() const {
+    return _averageLocalNumberCouplingCells;
+}
+
 // declare specialisation of IndexingService
 #ifdef INDEXING_ENABLE_DIM2
 template class coupling::indexing::IndexingService<2>;
