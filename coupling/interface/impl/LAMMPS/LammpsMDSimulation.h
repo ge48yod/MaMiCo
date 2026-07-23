@@ -3,8 +3,8 @@
 #include "USER-MAMICO/mamico_cell.h"
 #include "USER-MAMICO/mamico_lammps_md_solver_interface.h"
 #include "coupling/interface/MDSimulation.h"
-#include "lammps/input.h"
-#include "lammps/lammps.h"
+#include "input.h"
+#include "lammps.h"
 #include <mpi.h>
 
 namespace coupling {
@@ -196,38 +196,11 @@ private:
       for (int d = 0; d < MDSIMULATIONFACTORY_DIMENSION; d++) {
         particleDensity = particleDensity * _configuration.getDomainConfiguration().getMoleculesPerDirection()[d] / domainSize[d];
       }
-    }
-    // --------------------------------------------------------------------------------------------------------------------------------------------
-
-    // MY NEW CHANGE
-    // define molecule and LJ parameters
-    ss.str("");
-    ss << "pair_style lj/cut " << _configuration.getDomainConfiguration().getCutoffRadius();
-    _lmp->input->one(ss.str().c_str());
-    _lmp->input->one("pair_modify shift yes");
-    ss.str("");
-    ss << "pair_coeff 1 1 " << _configuration.getMoleculeConfiguration().getEpsilon() << " ";
-    ss << _configuration.getMoleculeConfiguration().getSigma() << " " << _configuration.getDomainConfiguration().getCutoffRadius();
-    _lmp->input->one(ss.str().c_str());
-
-    // set time step
-    ss.str("");
-    ss << "timestep " << _configuration.getSimulationConfiguration().getDt();
-    _lmp->input->one(ss.str().c_str());
-
-    // set some verlet-specific values; currently hard-coded
-    _lmp->input->one("neighbor 0.5 bin");
-    _lmp->input->one("neigh_modify delay 0 every 20 check no");
-
-    // write output; though this is not vtk format, we use this config for that purpose
-    if (_configuration.getVTKConfiguration().getWriteEveryTimestep() != 0) {
       ss.str("");
-      // MY NEW CHANGE
-      ss << "dump myDump all custom " << _configuration.getVTKConfiguration().getWriteEveryTimestep() << " ";
-      ss << _configuration.getVTKConfiguration().getFilename() << "_" << localMDSimulation << "_"
-         << "*.dat id type x y z vx vy vz";
+      ss << "lattice sc " << particleDensity << " origin 0.5 0.5 0.5";
       _lmp->input->one(ss.str().c_str());
     }
+    // --------------------------------------------------------------------------------------------------------------------------------------------
 
     // define simulation region
     ss.str("");

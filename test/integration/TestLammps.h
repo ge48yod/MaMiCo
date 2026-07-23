@@ -15,9 +15,9 @@
 #include <sstream>
 
 #include "coupling/interface/impl/LAMMPS/USER-MAMICO/mamico_cell.h"
-#include "lammps/atom.h"
-#include "lammps/input.h"
-#include "lammps/lammps.h"
+#include "atom.h"
+#include "input.h"
+#include "lammps.h"
 #include "mpi.h"
 
 /** general test class for lammps. Here, we provide tests for most get..(..)

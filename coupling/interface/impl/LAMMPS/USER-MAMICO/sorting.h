@@ -10,14 +10,14 @@
 
 #include "coupling/CouplingMDDefinitions.h"
 // MY NEW CHANGES , Maybe NOt needed
-#include "coupling/indexing/IndexingService.h"
-#include "coupling/indexing/IndexTypes.h"
-#include "coupling/indexing/Operations.h"
+// #include "coupling/indexing/IndexingService.h"
+// #include "coupling/indexing/IndexTypes.h"
+// #include "coupling/indexing/Operations.h"
 #include "tarch/la/Vector.h"
 
-#include "lammps/atom.h"
-#include "lammps/lammps.h"
-#include "lammps/memory.h"
+#include "atom.h"
+#include "lammps.h"
+#include "memory.h"
 
 namespace LAMMPS_NS {
 
@@ -370,15 +370,15 @@ private:
   }
 
   tarch::la::Vector<dim, unsigned int> getThisProcess() const {
-    // return {0}; // FIXME: Not yet implemented
+    return {0}; // FIXME: Not yet implemented
     //MY NEW CHANGE
-    return coupling::indexing::IndexingService<dim>::getInstance().getThisProcess();
+    // return coupling::indexing::IndexingService<dim>::getInstance().getThisProcess();
   }
   tarch::la::Vector<dim, unsigned int> getAverageLocalNumberCouplingCells() const {
-    // return {0}; // FIXME: Not yet implemented
+    return {0}; // FIXME: Not yet implemented
     //MY NEW CHANGE
-    return coupling::indexing::IndexingService<dim>::getInstance()
-    .getAverageLocalNumberCouplingCells();
+    // return coupling::indexing::IndexingService<dim>::getInstance()
+    // .getAverageLocalNumberCouplingCells();
   }
 
   /** returns the offset of the local MD domain, incl. a ghost layer of mamico

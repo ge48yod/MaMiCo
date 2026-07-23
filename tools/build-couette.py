@@ -163,6 +163,9 @@ def build_lammps(with_mpi, jobs=8):
     with ChangeDir(build_dir):
         had_error_pull = 0 != shell("git pull")  # Track latest LAMMPS release
         shutil.copytree(mamico_fix_dir, LAMMPS_REPO_DIR / "src" / "USER-MAMICO", dirs_exist_ok=True)
+        shutil.copy2(MAMICO_REPO_DIR / "coupling" / "indexing" / "IndexingService.cpp", LAMMPS_REPO_DIR / "src" / "USER-MAMICO")
+        shutil.copy2(MAMICO_REPO_DIR / "coupling" / "indexing" / "IndexingService.h", LAMMPS_REPO_DIR / "src" / "USER-MAMICO")
+        shutil.copy2(MAMICO_REPO_DIR / "coupling" / "indexing" / "Operations.h", LAMMPS_REPO_DIR / "src" / "USER-MAMICO")
         with open(LAMMPS_REPO_DIR / "cmake" / "CMakeLists.txt", 'r+') as file:
             cmakefile = file.readlines()
             inject = 0
