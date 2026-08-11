@@ -86,9 +86,14 @@ coupling::UsherParticleInsertion<LinkedCell, dim>::deleteParticle(coupling::data
   coupling::cellmappings::ComputeMassMapping<LinkedCell, dim> computeMassMapping(_mdSolverInterface);
   cell.iterateConstCells(computeMassMapping);
 
+  //MY NEW CHANGE
+  // std::cerr << "Abour to call the first problematic getUniformRandomNumber" << std::endl;
+
   // take a random particle
   const unsigned int randomParticle =
       static_cast<unsigned int>(tarch::utils::RandomNumberService::getInstance().getUniformRandomNumber() * computeMassMapping.getNumberOfParticles());
+    //MY NEW CHANGE
+  // std::cerr << "RandomNumberService was used in Usher deleteParticle to get UniformRandomNumberRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR=" << std::endl;
 
   // delete this random particle
   coupling::cellmappings::DeleteParticleMapping<LinkedCell, dim> deleteParticleMapping(randomParticle, _mdSolverInterface);
@@ -176,13 +181,19 @@ typename coupling::ParticleInsertion<LinkedCell, dim>::Action coupling::UsherPar
 #ifdef USHER_DEBUG
   std::cout << std::endl << "U_0 = " << U_0 << std::endl;
 #endif
+  //MY NEW CHANGE
+  // tarch::utils::RandomNumberService::getInstance().init();
 
   // try at max. restartMax times to insert this particle...
   for (int i = 0; i < restartMax; i++) {
 
+    //MY NEW CHANGE
+    // std::cerr << "Abour to call the second problematic getUniformRandomNumber" << std::endl;
     // generate random start position
     for (unsigned int d = 0; d < dim; d++) {
       position[d] = couplingCellPosition[d] + couplingCellSize[d] * tarch::utils::RandomNumberService::getInstance().getUniformRandomNumber();
+    //MY NEW CHANGE
+    // // std::cerr << "RandomNumberService was used in Usher findParticlePosition to get UniformRandomNumberRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR=" << std::endl;
     }
 
     // determine force and energy that act on molecule

@@ -34,18 +34,18 @@ public:
   /** returns the ranks on which the macroscopic solver holds/requires data of the coupling cell
    *  at index globalCellIndex.
    */
-  // virtual std::vector<unsigned int> getRanks(tarch::la::Vector<dim, unsigned int> globalCellIndex) {
-  //   std::vector<unsigned int> result;
-  //   result.push_back(0);
-  //   return result;
-  // }
+  virtual std::vector<unsigned int> getRanks(tarch::la::Vector<dim, unsigned int> globalCellIndex) {
+    std::vector<unsigned int> result;
+    result.push_back(0);
+    return result;
+  }
   //MY NEW CHANGE
-  virtual std::vector<unsigned int> getRanks(I01 idx) override {
-      return {0};
-  }
-  virtual unsigned int getOuterRegion() override {
-      return 0;
-  }
+  // virtual std::vector<unsigned int> getRanks(I01 idx) override {
+  //     return {0};
+  // }
+  // virtual unsigned int getOuterRegion() override {
+  //     return 0;
+  // }
 
   virtual std::vector<coupling::datastructures::CouplingCell<dim>*> getCouplingCells4Sending() {
     std::vector<coupling::datastructures::CouplingCell<dim>*> result;

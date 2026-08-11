@@ -123,6 +123,8 @@ public:
     random[0] = tarch::utils::RandomNumberService::getInstance().getGaussianRandomNumber();
     for (unsigned int d = 1; d < 3; d++)
       random[d] = 2.0 * M_PI * tarch::utils::RandomNumberService::getInstance().getUniformRandomNumber();
+    //MY NEW CHANGE
+    // std::cerr << "RandomNumberService was usedin LS1MDINterface to get UniformRandomNumberRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR=" << std::endl;
 
     // set initial velocity with randomized values
     initialVelocity[0] = meanVelocity[0] + standardDeviation * (random[0] * std::sin(random[1]) * std::cos(random[2]));

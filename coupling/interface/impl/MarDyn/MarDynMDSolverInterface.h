@@ -38,8 +38,8 @@ class MarDynMDSolverInterface : public coupling::interface::MDSolverInterface<Ma
 
 public:
   // MY NEW CHANGE , MAYBE NOT NEEDED
-  using Base = coupling::interface::MDSolverInterface<MarDynCell, 3>;
-  using CellIndex_T = typename Base::CellIndex_T;
+  // using Base = coupling::interface::MDSolverInterface<MarDynCell, 3>;
+  // using CellIndex_T = typename Base::CellIndex_T;
 
   MarDynMDSolverInterface(MarDynCoupledSimulation* simulation)
       : coupling::interface::MDSolverInterface<MarDynCell, 3>(), _mySimulation(simulation), _cutoffRadius(_mySimulation->getLJCutoff()), _tolerance(1.0e-8) {
@@ -182,6 +182,8 @@ public:
     random[0] = tarch::utils::RandomNumberService::getInstance().getGaussianRandomNumber();
     for (unsigned int d = 1; d < 3; d++)
       random[d] = 2.0 * M_PI * tarch::utils::RandomNumberService::getInstance().getUniformRandomNumber();
+    //MY NEW CHANGE
+    // std::cerr << "RandomNumberService was used in MarDynMDSolverInterface to get UniformRandomNumberRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR=" << std::endl;
 
     // set initial velocity with randomized values
     initialVelocity[0] = meanVelocity[0] + standardDeviation * (random[0] * std::sin(random[1]) * std::cos(random[2]));

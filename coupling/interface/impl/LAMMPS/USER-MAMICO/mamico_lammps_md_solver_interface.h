@@ -13,6 +13,7 @@
 #include "mamico_cell.h"
 #include "mamico_lammps_molecule_iterator.h"
 
+// build/LAMMPS/src/
 #include "atom_vec.h"
 #include "comm.h"
 #include "compute_pe_atom.h"
@@ -53,11 +54,10 @@ namespace LAMMPS_NS {
  */
 template <unsigned int dim> class MamicoLammpsMDSolverInterface : public coupling::interface::MDSolverInterface<LAMMPS_NS::MamicoCell, dim> {
 public:
-
-  // using CellIndex_T = I11; // FIXME: This should not be required, right?
+  using CellIndex_T = I11; // FIXME: This should not be required, right?
   // MY NEW CHANGE , MAYBE NOT NEEDD
-  using Base = coupling::interface::MDSolverInterface<LAMMPS_NS::MamicoCell, dim>;
-  using CellIndex_T = typename Base::CellIndex_T;
+  // using Base = coupling::interface::MDSolverInterface<LAMMPS_NS::MamicoCell, dim>;
+  // using CellIndex_T = typename Base::CellIndex_T;
 
   MamicoLammpsMDSolverInterface(LAMMPS* lmp, int seed, int numberCells, double cutoffRadius)
       : coupling::interface::MDSolverInterface<LAMMPS_NS::MamicoCell, dim>(), _lmp(lmp), _sorting(numberCells, lmp),
@@ -264,7 +264,7 @@ public:
     // method...
     if (indexAtom == -1) {
 #if (COUPLING_MD_DEBUG == COUPLING_MD_YES)
-  std::cout << "Molecule not found on rank " << IDXS.getRank() << std::endl;
+      std::cout << "Molecule not found on rank " << IDXS.getRank() << std::endl;
 #endif
       return;
     }

@@ -88,13 +88,13 @@ public:
       //       localIndex,
 
       //MY NEW CHANGE
-      I11 localIndex{tarch::la::Vector<3, int>{deleteCellIndex}};
+      // I11 localIndex{tarch::la::Vector<3, int>{deleteCellIndex}};
 
       LAMMPS_NS::MamicoCell& deleteCell =
           coupling::interface::MamicoInterfaceProvider<LAMMPS_NS::MamicoCell, dim>::getInstance().getMDSolverInterface()->getLinkedCell(
               //MY NEW CHANGE
-              // I03{deleteCellIndex}, 
-              localIndex,
+              I03{deleteCellIndex}, 
+              // localIndex,
               linkedCellInCouplingCell, 
               linkedCellsPerCouplingCell);
       coupling::interface::MoleculeIterator<LAMMPS_NS::MamicoCell, dim>* iterator =

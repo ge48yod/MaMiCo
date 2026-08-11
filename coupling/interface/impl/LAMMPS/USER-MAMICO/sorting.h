@@ -15,6 +15,7 @@
 // #include "coupling/indexing/Operations.h"
 #include "tarch/la/Vector.h"
 
+// build/LAMMPS/src/
 #include "atom.h"
 #include "lammps.h"
 #include "memory.h"

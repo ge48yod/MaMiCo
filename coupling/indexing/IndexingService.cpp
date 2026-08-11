@@ -340,8 +340,8 @@ void coupling::indexing::IndexingService<dim>::initWithCells(const tarch::la::Ve
 
   for (unsigned int d = 0; d < dim; d++) {
     // MY NEW CHANGE
-    _averageLocalNumberCouplingCells[d] =
-        globalNumberCouplingCells[d] / numberProcesses[d];
+    // _averageLocalNumberCouplingCells[d] =
+    //     globalNumberCouplingCells[d] / numberProcesses[d];
 
     if (globalNumberCouplingCells[d] % numberProcesses[d] != 0) {
       std::stringstream ss;
@@ -653,24 +653,24 @@ unsigned int coupling::indexing::IndexingService<dim>::getUniqueRankForCouplingC
 
 // MY NEW CHANGE
 
-template <unsigned int dim>
-tarch::la::Vector<dim, unsigned int>
-coupling::indexing::IndexingService<dim>::getProcessCoordinates(unsigned int rank) const {
-    const unsigned int topologyOffset =
-        (rank / _scalarNumberProcesses) * _scalarNumberProcesses;
-    return _parallelTopology->getProcessCoordinates(rank, topologyOffset);
-}
-template <unsigned int dim>
-tarch::la::Vector<dim, unsigned int>
-coupling::indexing::IndexingService<dim>::getThisProcess() const {
-    return getProcessCoordinates(_rank);
-}
+// template <unsigned int dim>
+// tarch::la::Vector<dim, unsigned int>
+// coupling::indexing::IndexingService<dim>::getProcessCoordinates(unsigned int rank) const {
+//     const unsigned int topologyOffset =
+//         (rank / _scalarNumberProcesses) * _scalarNumberProcesses;
+//     return _parallelTopology->getProcessCoordinates(rank, topologyOffset);
+// }
+// template <unsigned int dim>
+// tarch::la::Vector<dim, unsigned int>
+// coupling::indexing::IndexingService<dim>::getThisProcess() const {
+//     return getProcessCoordinates(_rank);
+// }
 
-template <unsigned int dim>
-tarch::la::Vector<dim, unsigned int>
-coupling::indexing::IndexingService<dim>::getAverageLocalNumberCouplingCells() const {
-    return _averageLocalNumberCouplingCells;
-}
+// template <unsigned int dim>
+// tarch::la::Vector<dim, unsigned int>
+// coupling::indexing::IndexingService<dim>::getAverageLocalNumberCouplingCells() const {
+//     return _averageLocalNumberCouplingCells;
+// }
 
 // declare specialisation of IndexingService
 #ifdef INDEXING_ENABLE_DIM2

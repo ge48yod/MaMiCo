@@ -237,7 +237,6 @@ def build_mamico_couette(
     elif md_solver == "lammps":
         had_error |= build_lammps(with_mpi, jobs)
         cmake_args = cmake_args.replace("LAMMPS=OFF", "LAMMPS=ON")
-        shell(f"ln -sf {LAMMPS_REPO_DIR}/src {MAMICO_REPO_DIR}/lammps")
         cmake_args += f" -DLAMMPS_DIR={LAMMPS_REPO_DIR}"
     cmake_args += f" -DBUILD_WITH_OPENFOAM={'ON' if with_openfoam else 'OFF'}"
     environement_prefix = " ".join(f"{k}={v}" for k, v in environement.items())

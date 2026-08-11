@@ -42,6 +42,11 @@ tarch::utils::RandomNumberService& tarch::utils::RandomNumberService::getInstanc
 }
 
 void tarch::utils::RandomNumberService::init(bool fixSeed) {
+  // std::cout
+  //   << "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRInitializing RandomNumberService this="
+  //   << this
+  //   << std::endl;
+  // MY NEW CHANGE TODO Correct part above later
   if (_isInitialized)
     return;
   // for testing purpose: fix seed to a certain number
@@ -62,9 +67,15 @@ void tarch::utils::RandomNumberService::init(bool fixSeed) {
 void tarch::utils::RandomNumberService::shutdown() {}
 
 double tarch::utils::RandomNumberService::getUniformRandomNumber() const {
+  // std::cout
+  //     << "RandomNumberService thisRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR=" << this
+  //     << " initialized=" << _isInitialized
+  //     << std::endl;
+
   if (!_isInitialized) {
-    throw std::runtime_error(std::string("RandomNumberService: Called getUniformRandomNumber() before initalization!"));
+      throw std::runtime_error("RandomNumberService not initialized");
   }
+
 
   // We do not want this method to return 1.0, as this can lead to invalid behaviour
   // in some situations. E.g., the Usher particle insertion relies on this method

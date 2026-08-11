@@ -3,8 +3,10 @@
 #include "USER-MAMICO/mamico_cell.h"
 #include "USER-MAMICO/mamico_lammps_md_solver_interface.h"
 #include "coupling/interface/MDSimulation.h"
-#include "input.h"
-#include "lammps.h"
+//#include "lammps/
+#include "build/LAMMPS/src/input.h"
+//#include "lammps/
+#include "build/LAMMPS/src/lammps.h"
 #include <mpi.h>
 
 namespace coupling {
@@ -118,6 +120,7 @@ public:
 
 private:
   void initSingleSimulation(MPI_Comm comm, unsigned int localMDSimulation) {
+    tarch::utils::RandomNumberService::getInstance().init(_configuration.getSimulationConfiguration().fixSeed());
     int rank;
     MPI_Comm_rank(comm, &rank);
     std::stringstream ss;
@@ -200,7 +203,6 @@ private:
       ss << "lattice sc " << particleDensity << " origin 0.5 0.5 0.5";
       _lmp->input->one(ss.str().c_str());
     }
-    // --------------------------------------------------------------------------------------------------------------------------------------------
 
     // define simulation region
     ss.str("");

@@ -8,6 +8,9 @@
 #include "atom.h"
 #include "lammps.h"
 #include "memory.h"
+// #include "build/LAMMPS/src/atom.h"
+// #include "build/LAMMPS/src/lammps.h"
+// #include "build/LAMMPS/src/memory.h"
 
 #include "coupling/CouplingMDDefinitions.h"
 

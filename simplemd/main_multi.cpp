@@ -52,6 +52,9 @@ int main(int argc, char* argv[]) {
       std::cout << "ERROR main_multi.cpp: simulations[" << i << "]==NULL!" << std::endl;
       exit(EXIT_FAILURE);
     }
+    
+    // My New Change
+    // std::cerr << "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR initservices in main_multi" << std::endl;
     simulations[i]->initServices(multiMDService, multiMDService.getGlobalNumberOfLocalMDSimulation(i));
   }
   // solve MD simulations

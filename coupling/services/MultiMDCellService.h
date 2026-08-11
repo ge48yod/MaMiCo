@@ -574,6 +574,8 @@ public:
       std::exit(EXIT_FAILURE);
     }
 
+    // std::cout << "Entered addMDSimulation() and about to write checkpointRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR" << std::endl;
+
     std::stringstream filestem;
     filestem << "restart_checkpoint_" << _multiMDService.getGlobalRank() / computeScalarNumberProcesses();
     instanceHandling.writeCheckpoint(filestem.str().c_str(), 0);

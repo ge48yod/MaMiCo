@@ -90,7 +90,9 @@ void simplemd::MolecularDynamicsSimulation::initServices() {
               << std::endl;
     std::cout << " Local Domain size: " << localDomainSize << ", local domain offset: " << localDomainOffset << std::endl;
 #endif
-
+    //My New Change
+    // std::cerr << "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRFirst init of RandomNumberService in MolecularDynamicsSimulation" << std::endl;
+  // My New Change
     tarch::utils::RandomNumberService::getInstance().init(_configuration.getSimulationConfiguration().fixSeed());
     _molecularPropertiesService = new simplemd::services::MolecularPropertiesService(
         _configuration.getMoleculeConfiguration().getMass(), _configuration.getMoleculeConfiguration().getEpsilon(),
@@ -230,6 +232,7 @@ void simplemd::MolecularDynamicsSimulation::initServices() {
 }
 
 void simplemd::MolecularDynamicsSimulation::initServices(const tarch::utils::MultiMDService<MD_DIM>& multiMDService, unsigned int localMDSimulation) {
+  tarch::utils::RandomNumberService::getInstance().init(_configuration.getSimulationConfiguration().fixSeed());
   // set vtk file stem and checkpoint filestem and adios2 filestem;
   _localMDSimulation = localMDSimulation;
   std::stringstream filestems;
@@ -299,8 +302,10 @@ void simplemd::MolecularDynamicsSimulation::initServices(const tarch::utils::Mul
               << std::endl;
     std::cout << " Local Domain size: " << localDomainSize << ", local domain offset: " << localDomainOffset << std::endl;
 #endif
-
-    tarch::utils::RandomNumberService::getInstance().init(_configuration.getSimulationConfiguration().fixSeed());
+    
+    //My New Change
+    // std::cerr << "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRSecond init of RandomNumberService in MolecularDynamicsSimulation" << std::endl;
+    // tarch::utils::RandomNumberService::getInstance().init(_configuration.getSimulationConfiguration().fixSeed());
     _molecularPropertiesService = new simplemd::services::MolecularPropertiesService(
         _configuration.getMoleculeConfiguration().getMass(), _configuration.getMoleculeConfiguration().getEpsilon(),
         _configuration.getMoleculeConfiguration().getSigma(), _configuration.getDomainConfiguration().getCutoffRadius(),
