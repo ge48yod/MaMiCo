@@ -371,15 +371,14 @@ private:
   }
 
   tarch::la::Vector<dim, unsigned int> getThisProcess() const {
-    return {0}; // FIXME: Not yet implemented
+    // return {0}; // FIXME: Not yet implemented
     //MY NEW CHANGE
-    // return coupling::indexing::IndexingService<dim>::getInstance().getThisProcess();
+    return coupling::indexing::IndexingService<dim>::getInstance().getThisProcess();
   }
   tarch::la::Vector<dim, unsigned int> getAverageLocalNumberCouplingCells() const {
-    return {0}; // FIXME: Not yet implemented
+    // return {0}; // FIXME: Not yet implemented
     //MY NEW CHANGE
-    // return coupling::indexing::IndexingService<dim>::getInstance()
-    // .getAverageLocalNumberCouplingCells();
+    return coupling::indexing::IndexingService<dim>::getInstance().getAverageLocalNumberCouplingCells();
   }
 
   /** returns the offset of the local MD domain, incl. a ghost layer of mamico
@@ -392,6 +391,12 @@ private:
     // shift lower offset to the correct process
     const tarch::la::Vector<dim, unsigned int> thisProcess = getThisProcess();
     const tarch::la::Vector<dim, unsigned int> avgNumberCells = getAverageLocalNumberCouplingCells();
+    
+    // MY NEW CHANGE for debugging
+    // std::cout << "Rank " << IDXS.getRank()
+    //       << " coords=" << getThisProcess()
+    //       << std::endl;
+
     for (unsigned int d = 0; d < dim; d++) {
       localOffset[d] += meshsize[d] * thisProcess[d] * avgNumberCells[d];
     }

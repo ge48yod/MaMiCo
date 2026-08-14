@@ -159,9 +159,9 @@ public:
   unsigned int getUniqueRankForCouplingCell(const BaseIndex<dim>& globalCellIndex, unsigned int topologyOffset) const;
 
   // MY NEW CHANGE
-  // tarch::la::Vector<dim, unsigned int> getThisProcess() const;
+  tarch::la::Vector<dim, unsigned int> getThisProcess() const;
 
-  // tarch::la::Vector<dim, unsigned int> getAverageLocalNumberCouplingCells() const;
+  tarch::la::Vector<dim, unsigned int> getAverageLocalNumberCouplingCells() const;
 
 #if (COUPLING_MD_PARALLEL == COUPLING_MD_YES) // parallel scenario
   MPI_Comm getComm() const {
@@ -272,8 +272,8 @@ private:
                                             const tarch::la::Vector<dim, unsigned int>& globalNumberCouplingCells, unsigned int topologyOffset) const;
 
   //MY NEW CHANGE
-  // tarch::la::Vector<dim, unsigned int> getProcessCoordinates(unsigned int rank) const;
-  // tarch::la::Vector<dim, unsigned int> _averageLocalNumberCouplingCells;
+  tarch::la::Vector<dim, unsigned int> getProcessCoordinates(unsigned int rank) const;
+  tarch::la::Vector<dim, unsigned int> _averageLocalNumberCouplingCells;
   
   /*const*/ tarch::la::Vector<dim, unsigned int> _numberProcesses; // TODO: make const
   unsigned int _scalarNumberProcesses;
