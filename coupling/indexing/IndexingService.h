@@ -161,9 +161,9 @@ public:
   // MY NEW CHANGE
   tarch::la::Vector<dim, unsigned int> getThisProcess() const;
 
-  tarch::la::Vector<dim, double> getLocalNumberCouplingCells() const;
+  tarch::la::Vector<dim, unsigned int> getLocalNumberCouplingCells() const;
 
-  tarch::la::Vector<dim, double> getLocalCellOffset() const;
+  tarch::la::Vector<dim, unsigned int> getLocalCellOffset() const;
 
 #if (COUPLING_MD_PARALLEL == COUPLING_MD_YES) // parallel scenario
   MPI_Comm getComm() const {
@@ -275,8 +275,8 @@ private:
 
   //MY NEW CHANGE
   tarch::la::Vector<dim, unsigned int> getProcessCoordinates(unsigned int rank) const;
-  tarch::la::Vector<dim, double> _localNumberCouplingCells;
-  tarch::la::Vector<dim, double> _localCellOffset;
+  tarch::la::Vector<dim, unsigned int> _localNumberCouplingCells;
+  tarch::la::Vector<dim, unsigned int> _localCellOffset;
   
   /*const*/ tarch::la::Vector<dim, unsigned int> _numberProcesses; // TODO: make const
   unsigned int _scalarNumberProcesses;

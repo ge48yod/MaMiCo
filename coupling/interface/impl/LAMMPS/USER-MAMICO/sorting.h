@@ -380,7 +380,13 @@ private:
   tarch::la::Vector<dim, double> getLocalSize() const {
     // return {0}; // FIXME: Not yet implemented
     //MY NEW CHANGE
-    return coupling::indexing::IndexingService<dim>::getInstance().getLocalNumberCouplingCells();
+    tarch::la::Vector<dim, unsigned int> localNumberCouplingCells = coupling::indexing::IndexingService<dim>::getInstance().getLocalNumberCouplingCells();
+    const tarch::la::Vector<dim, double> meshsize = IDXS.getCouplingCellSize();
+    tarch::la::Vector<dim, double> localSize(0.0);
+    for (unsigned int d = 0; d < dim; d++) {
+      localSize[d] = meshsize[d] *(localNumberCouplingCells[d] + 2);
+    }
+    return localSize;
   }
 
   //MY NEW CHANGE
@@ -388,7 +394,13 @@ private:
   tarch::la::Vector<dim, double> getLocalOffset() const {
     // return {0}; // FIXME: Not yet implemented
     //MY NEW CHANGE
-    return coupling::indexing::IndexingService<dim>::getInstance().getLocalCellOffset();
+    tarch::la::Vector<dim, unsigned int> localCellOffset = coupling::indexing::IndexingService<dim>::getInstance().getLocalCellOffset();
+    const tarch::la::Vector<dim, double> meshsize = IDXS.getCouplingCellSize();
+    tarch::la::Vector<dim, double> localOffset = IDXS.getGlobalMDDomainOffset() - meshsize;
+    for (unsigned int d = 0; d < dim; d++) {
+      localOffset[d] += meshsize[d] * localCellOffset[d];
+    }
+    return localOffset;
   }
 
   /** returns the offset of the local MD domain, incl. a ghost layer of mamico

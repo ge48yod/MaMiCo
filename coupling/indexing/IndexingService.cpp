@@ -673,13 +673,13 @@ coupling::indexing::IndexingService<dim>::getThisProcess() const {
 }
 
 template <unsigned int dim>
-tarch::la::Vector<dim, double>
+tarch::la::Vector<dim, unsigned int>
 coupling::indexing::IndexingService<dim>::getLocalNumberCouplingCells() const {
     return _localNumberCouplingCells;
 }
 
 template <unsigned int dim>
-tarch::la::Vector<dim, double>
+tarch::la::Vector<dim, unsigned int>
 coupling::indexing::IndexingService<dim>::getLocalCellOffset() const {
     return _localCellOffset;
 }
