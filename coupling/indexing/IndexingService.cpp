@@ -340,8 +340,10 @@ void coupling::indexing::IndexingService<dim>::initWithCells(const tarch::la::Ve
 
   for (unsigned int d = 0; d < dim; d++) {
     // MY NEW CHANGE
-    _averageLocalNumberCouplingCells[d] =
-        globalNumberCouplingCells[d] / numberProcesses[d];
+    // TODO: assumes uniform distribution of cells across processes
+    // _averageLocalNumberCouplingCells[d] =
+    //     globalNumberCouplingCells[d] / numberProcesses[d];
+    //Moved it down for non-uniform to after definition of topologyOffset
 
     if (globalNumberCouplingCells[d] % numberProcesses[d] != 0) {
       std::stringstream ss;
@@ -465,6 +467,10 @@ void coupling::indexing::IndexingService<dim>::initWithCells(const tarch::la::Ve
       // find the last occurence, add one to convert reverse iterator to forward
       boxMax[i] =
           std::distance(_subdomainOwnership[i].begin(), (std::find(_subdomainOwnership[i].rbegin(), _subdomainOwnership[i].rend(), coords[i]) + 1).base());
+
+      // MY NEW CHANGE
+      _localCellOffset[i] = boxMin[i];
+      _localNumberCouplingCells[i] = boxMax[i] - boxMin[i];
     }
     // _subdomainOwnership does not include ghost, so when we take the first occurence value, it is noGhost
     // however directly casting it into baseIndex shifts everything left by 1, since baseIndex expects ghost
@@ -667,9 +673,15 @@ coupling::indexing::IndexingService<dim>::getThisProcess() const {
 }
 
 template <unsigned int dim>
-tarch::la::Vector<dim, unsigned int>
-coupling::indexing::IndexingService<dim>::getAverageLocalNumberCouplingCells() const {
-    return _averageLocalNumberCouplingCells;
+tarch::la::Vector<dim, double>
+coupling::indexing::IndexingService<dim>::getLocalNumberCouplingCells() const {
+    return _localNumberCouplingCells;
+}
+
+template <unsigned int dim>
+tarch::la::Vector<dim, double>
+coupling::indexing::IndexingService<dim>::getLocalCellOffset() const {
+    return _localCellOffset;
 }
 
 // declare specialisation of IndexingService
